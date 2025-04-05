@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScrapiX Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 900px;
+            height: 600px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .signup-container {
+            flex: 0.5;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: white;
+        }
+
+        .image-container {
+            flex: 0.5;
+            position: relative;
+            background: linear-gradient(135deg, #00684a 0%, #00bf68 100%);
+            overflow: hidden;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+        }
+
+        .content-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            background: rgba(0, 104, 74, 0.7);
+        }
+
+        .feature-list {
+            margin-top: 24px;
+            list-style: none;
+        }
+
+        .feature-list li {
+            margin: 12px 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .content-overlay h2 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .content-overlay p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .signup-container h2 {
+            color: #1a1a1a;
+            margin-bottom: 32px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 16px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            color: #333;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #f8f8f8;
+        }
+
+        .input-field:focus {
+            border-color: #00a846;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 168, 70, 0.1);
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 320px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .primary-btn {
+            background: #00a846;
+            color: white;
+            margin-top: 16px;
+        }
+
+        .primary-btn:hover {
+            background: #008a3b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 168, 70, 0.2);
+        }
+
+        .toggle-form {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toggle-form a {
+            color: #00a846;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 5px;
+        }
+
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .image-container {
+                min-height: 300px;
+            }
+
+            .signup-container {
+                padding: 32px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="signup-container">
+            <h2 id="form-title">Join ScrapiX Today</h2>
+            
+            <form id="signup-form" class="form-container">
+                <div class="input-group">
+                    <input type="text" id="username" class="input-field" placeholder="Username" required>
+                    <span id="username-error" class="error-message">Username is required</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" id="email" class="input-field" placeholder="Email" required>
+                    <span id="email-error" class="error-message">Invalid email format</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="password" class="input-field" placeholder="Password" required>
+                    <span id="password-error" class="error-message">Password must be at least 6 characters</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="confirm-password" class="input-field" placeholder="Confirm Password" required>
+                    <span id="confirm-password-error" class="error-message">Passwords do not match</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="phone" class="input-field" placeholder="Phone Number" required>
+                    <span id="phone-error" class="error-message">Invalid phone number</span>
+                </div>
+
+                <button type="submit" class="btn primary-btn">Create Account</button>
+                <div class="toggle-form">
+                    Already have an account?<a href="login.html" id="show-login">Login</a>
+                </div>
+            </form>
+
+            
+        </div>
+        
+        <div class="image-container">
+            <div class="content-overlay">
+                <h2>Sustainable Future</h2>
+                <p>Join our mission for a greener tomorrow</p>
+                <ul class="feature-list">
+                    <li>Smart Recycling Solutions</li>
+                    <li>Sustainable Practices</li>
+                    <li>Environmental Impact</li>
+                    <li>Real-time Analytics</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+ document.getElementById("signup-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;  // Fixed ID
+    const password = document.getElementById("password").value;  // Fixed ID
+
+    // Validate phone number (only digits, 10-15 characters)
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (!phoneRegex.test(phone)) {
+        document.getElementById("phone-error").style.display = "block";
+        return;
+    } else {
+        document.getElementById("phone-error").style.display = "none";
+    }
+
+    try {
+        const response = await fetch("http://localhost:5500/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, phone_number: phone, password, confirm_password: password })
+    
+
+        });
+
+        const data = await response.json();
+        alert(data.message);
+
+        if (response.ok) {
+            window.location.href = "login.html";
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong. Please try again.");
+    }
+});
+
+    </script>
+</body>
+</html>

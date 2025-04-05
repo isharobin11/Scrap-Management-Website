@@ -1,0 +1,623 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Select Subcategory</title> 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style> 
+        body { 
+            font-family: 'Segoe UI', 'Arial', sans-serif; 
+            text-align: center; 
+            background-color: #f9f9f9; 
+            margin: 0; 
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            color: #2C3E50;
+            margin: 30px 0;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 3px;
+        }
+
+        #subcategories {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin: 40px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .subcategory { 
+            width: 220px;
+            background-color: #fff;
+            cursor: pointer; 
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .subcategory:hover { 
+            transform: translateY(-7px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .subcategory.selected {
+            border: 2px solid #4CAF50;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.25);
+        }
+
+        .subcategory.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #4CAF50;
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 2;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .subcategory-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+            background-color: #f8f8f8;
+        }
+
+        .subcategory-content {
+            padding: 20px 15px;
+            position: relative;
+        }
+
+        .subcategory-icon {
+            font-size: 35px;
+            margin-bottom: 15px;
+            color: #4CAF50;
+            opacity: 0.8;
+        }
+
+        .subcategory-name {
+            margin: 0 0 12px 0;
+            font-size: 17px;
+            color: #2C3E50;
+            font-weight: 600;
+        }
+
+        .subcategory-price {
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 20px;
+            margin: 8px 0 0;
+        }
+
+        .subcategory-price-unit {
+            font-size: 14px;
+            color: #777;
+            font-weight: normal;
+            margin-left: 2px;
+        }
+
+        .subcategory-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent);
+            margin: 12px 0;
+        }
+
+        .image-upload {
+            display: none;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            border: 1px solid #eee;
+        }
+
+        .image-upload h3 {
+            color: #2C3E50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+        .file-upload-container {
+            border: 2px dashed #ddd;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+            background: #fcfcfc;
+        }
+
+        .file-upload-container:hover {
+            border-color: #4CAF50;
+            background: #f9fff9;
+        }
+
+        .file-upload-label {
+            display: block;
+            cursor: pointer;
+        }
+
+        .file-upload-preview {
+            max-width: 100%;
+            max-height: 220px;
+            margin-top: 20px;
+            display: none;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="file"] {
+            width: 100%;
+            cursor: pointer;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .file-upload-text {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .file-upload-icon {
+            font-size: 40px;
+            color: #4CAF50;
+            opacity: 0.6;
+            margin-bottom: 15px;
+        }
+
+        .buttons-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        button {
+            padding: 14px 28px; 
+            background: #4CAF50; 
+            color: white; 
+            font-size: 16px;
+            font-weight: 600;
+            border: none; 
+            border-radius: 10px;
+            cursor: pointer; 
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        button:hover {
+            background: #3b9c3f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        #selected-list {
+            margin: 15px 0;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        #cancelButton {
+            background: #f44336;
+            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.2);
+        }
+        
+        #cancelButton:hover {
+            background: #e53935;
+            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .subcategory {
+                width: calc(50% - 20px);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .subcategory {
+                width: 100%;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+
+ /* Floating Circular Sidebar */
+.sidebar {
+    width: 80px;
+    height: 80px;
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+/* User Avatar Wrapper */
+.user-avatar-container {
+    width: 65px;
+    height: 65px;
+    background: #ebeceb;  /* Dark green background */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* User Avatar Icon */
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    opacity: 0.9;
+}
+
+/* Expand Sidebar on Hover */
+.sidebar:hover {
+    width: 220px;
+    height: auto;
+    border-radius: 16px;
+    padding: 20px 15px;
+    background: #f2f3f2;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Show Menu When Hovered */
+.sidebar:hover .nav-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Hide Menu Initially */
+.nav-links {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+
+/* Sidebar Menu Styling */
+.nav-links li {
+    text-align: center;
+    background: #29543c;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.nav-links li:hover {
+    background: #3c6a4a;
+    transform: translateY(-2px);
+}
+
+
+    </style>
+</head> 
+<body> 
+
+    <div class="sidebar">
+        <div class="user-avatar-container">
+            <img src="user.png" class="user-avatar" alt="User Icon">
+        </div>
+        <ul class="nav-links">
+            <li onclick="window.location.href='profile.html'">
+                <i class="fas fa-user-circle"></i>Profile
+            </li>
+            <li onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>Logout
+            </li>
+        </ul>
+    </div>
+    
+    <h1>Select Scrap Subcategory</h1> 
+    <div id="subcategories"></div> 
+    <div id="selected-list"></div>
+
+    <div class="image-upload">
+        <h3>Upload Image</h3>
+        <div class="file-upload-container">
+            <label class="file-upload-label">
+                <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="file-upload-text">Click to select or drop an image here</div>
+                <input type="file" id="scrapImage" accept="image/*">
+            </label>
+            <img id="imagePreview" class="file-upload-preview" src="#" alt="Preview">
+        </div>
+        <div class="buttons-container">
+            <button id="cancelButton"><i class="fas fa-times"></i>Cancel</button>
+            <button id="submitScrap"><i class="fas fa-check"></i>Submit Scrap</button>
+        </div>
+    </div>
+    <script>
+        let selectedCategory = localStorage.getItem("selectedCategory");
+        let selectedSubcategories = []; // Store multiple selections IDs
+        let selectedSubcategoryNames = []; // Store names for display and localStorage
+        
+        // Get material-specific icons
+        const materialIcons = {
+            // Paper category
+            "newspaper": "fa-solid fa-newspaper",
+            "book": "fa-solid fa-book",
+            "carton": "fa-solid fa-box",
+            "magazines": "fa-solid fa-book-open",
+            
+            // Metals category
+            "aluminum": "fa-solid fa-cookie-bite",
+            "copper": "fa-solid fa-ring",
+            "steel": "fa-solid fa-bolt",
+            "coppercable": "fa-solid fa-ethernet",
+            "brass": "fa-solid fa-magnet",
+            "steel iron": "fa-solid fa-magnet",
+            
+            // Plastics category
+            "old electric cables": "fa-solid fa-plug",
+            "soft plastic": "fa-solid fa-shopping-bag",
+            "mix plastic": "fa-solid fa-wine-bottle",
+            "polythene mix": "fa-solid fa-prescription-bottle",
+            
+            // Electronics category
+            "air conditioner": "fa-solid fa-wind",
+            "cpu": "fa-solid fa-microchip",
+            "cooler": "fa-solid fa-fan",
+            "fridge": "fa-solid fa-temperature-low",
+            "electronic parts": "fa-solid fa-memory",
+            "laptop": "fa-solid fa-laptop",
+            
+            // Fallbacks for any other categories
+            "Paper": "fa-solid fa-scroll",
+            "Plastic": "fa-solid fa-compact-disc",
+            "Electronic": "fa-solid fa-tv",
+            "Batteries": "fa-solid fa-car-battery",
+            "Cardboard": "fa-solid fa-box-open",
+            "Textiles": "fa-solid fa-tshirt",
+            "Wood": "fa-solid fa-tree",
+            "Rubber": "fa-solid fa-car"
+        };
+        
+        // Online image URLs for subcategories
+        const sampleImages = {
+            "Aluminum": "https://via.placeholder.com/300x200/C0C0C0",  // Silver color
+            "Copper": "https://via.placeholder.com/300x200/B87333",    // Copper color
+            "Steel": "https://via.placeholder.com/300x200/71797E",     // Steel color
+            "Plastic": "https://via.placeholder.com/300x200/E6E6E6",   // Light gray
+            "Paper": "https://via.placeholder.com/300x200/FFFFFF",     // White
+            "Glass": "https://via.placeholder.com/300x200/ADD8E6",     // Light blue
+            "Electronic": "https://via.placeholder.com/300x200/2F4F4F", // Dark slate
+            "Batteries": "https://via.placeholder.com/300x200/FFD700",  // Gold
+            "Cardboard": "https://via.placeholder.com/300x200/D2B48C",  // Tan
+            "Textiles": "https://via.placeholder.com/300x200/F5F5DC",   // Beige
+            "Wood": "https://via.placeholder.com/300x200/8B4513",       // Brown
+            "Rubber": "https://via.placeholder.com/300x200/36454F"      // Charcoal
+        };
+        
+        const samplePrices = {
+            "Newspaper":"14",
+            "Book":"12",
+            "Magazine":"15",
+            "Cartons":"25",
+            "Old Electric Cables":"20",
+            "Polythene Mix":"15",
+            "Soft Plastic":"12",
+            "Mix Plastic":"10",
+            "Aluminum": "15",
+            "Copper": "25",
+            "Steel": "10",
+            "Brass": "20",
+            "Copper Cable": "12",
+            "Iron": "10",
+            "Air Conditioner": "100",
+            "Fridge": "50",
+            "CPU": "25",
+            "Laptop": "50",
+            "Cooler": "25",
+            "Electronic Parts": "20",
+             "default":"14"
+        };
+    
+
+        // Load existing selections from localStorage
+        let existingSelections = JSON.parse(localStorage.getItem("selectedSubcategoryNames")) || [];
+        
+        if (!selectedCategory) {
+            alert("No category selected!");
+            window.location.href = "categories.html";
+        }
+        
+        $(document).ready(function () {
+            // Handle file input change for preview
+            $('#scrapImage').change(function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#imagePreview').attr('src', e.target.result).show();
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            $.get(`http://localhost:5500/subcategories/${selectedCategory}`, function (subcategories) {
+                subcategories.forEach(sub => {
+                    // Get image URL and price from our sample data (in a real app, these would come from your API)
+                    const imageUrl = sampleImages[sub.subcategory_name] || "https://cdn.pixabay.com/photo/2017/01/20/15/12/recycling-1995005_1280.jpg";
+                    const price = samplePrices[sub.subcategory_name] || "15";
+                    const icon = materialIcons[sub.subcategory_name.toLowerCase()] || "fa-solid fa-recycle";
+                    
+                    $('#subcategories').append(`
+                        <div class="subcategory" data-id="${sub.subcategory_id}" data-name="${sub.subcategory_name}">
+                            <div class="subcategory-content">
+                                <div class="subcategory-icon"><i class="${icon}"></i></div>
+                                <h3 class="subcategory-name">${sub.subcategory_name}</h3>
+                                <div class="subcategory-divider"></div>
+                                <p class="subcategory-price">${price}<span class="subcategory-price-unit">per kg</span></p>
+                            </div>
+                        </div>
+                    `);
+                    
+                    // Check if this subcategory was previously selected
+                    if (existingSelections.includes(sub.subcategory_name)) {
+                        $(`.subcategory[data-name="${sub.subcategory_name}"]`).addClass("selected");
+                        selectedSubcategories.push(sub.subcategory_id);
+                        selectedSubcategoryNames.push(sub.subcategory_name);
+                    }
+                });
+                
+                // If any subcategories were previously selected, show the upload section
+                if (selectedSubcategories.length > 0) {
+                    $('.image-upload').show();
+                }
+                
+                // Click event for subcategory selection
+                $(".subcategory").click(function () {
+                    let subcategoryId = $(this).attr("data-id");
+                    let subcategoryName = $(this).attr("data-name");
+                    
+                    if (selectedSubcategories.includes(subcategoryId)) {
+                        // Remove if already selected
+                        selectedSubcategories = selectedSubcategories.filter(id => id !== subcategoryId);
+                        selectedSubcategoryNames = selectedSubcategoryNames.filter(name => name !== subcategoryName);
+                        $(this).removeClass("selected");
+                    } else {
+                        // Add to selection
+                        selectedSubcategories.push(subcategoryId);
+                        selectedSubcategoryNames.push(subcategoryName);
+                        $(this).addClass("selected");
+                    }
+                    
+                    // Show/hide upload section based on selections
+                    if (selectedSubcategories.length > 0) {
+                        $('.image-upload').show();
+                    } else {
+                        $('.image-upload').hide();
+                    }
+                });
+            });
+            
+            // Cancel button to go back to scrap list without submitting
+            $('#cancelButton').click(function() {
+                // Save current selections before going back
+                localStorage.setItem("selectedSubcategoryNames", JSON.stringify(selectedSubcategoryNames));
+                window.location.href = "category.html";
+            });
+            
+            $('#submitScrap').click(function () {
+                const file = $('#scrapImage')[0].files[0];
+                if (!file) {
+                    alert('Please upload an image.');
+                    return;
+                }
+                
+                let userId = localStorage.getItem("user_id");
+                if (!userId) {
+                    alert("User not logged in. Please log in first.");
+                    return;
+                }
+                
+                if (selectedSubcategories.length === 0) {
+                    alert("Please select at least one subcategory.");
+                    return;
+                }
+                
+                // Combine existing selections with new ones
+                let combinedSelections = [...new Set([...existingSelections, ...selectedSubcategoryNames])];
+                localStorage.setItem("selectedSubcategoryNames", JSON.stringify(combinedSelections));
+                
+                let formData = new FormData();
+                formData.append("user_id", userId);
+                formData.append("category_id", selectedCategory);
+                formData.append("subcategories", JSON.stringify(selectedSubcategories)); // Send as JSON array
+                formData.append("image", file);
+                
+                $.ajax({
+                    url: "http://localhost:5500/submit-scrap",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        alert(response.message);
+                        window.location.href = "scraplist.html"; // Redirect to next page
+                    },
+                    error: function () {
+                        alert("Error submitting scrap.");
+                    }
+                });
+            });
+        });
+
+        function logout() {
+            localStorage.removeItem("user_id");
+            window.location.href = "home.html";
+        }
+    </script>
+</body>
+</html>

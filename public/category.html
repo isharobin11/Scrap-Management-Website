@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What would you like to sell?</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --primary-green: #2F5A3D;
+            --light-green: #f0f7f1;
+            --hover-green: #234530;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--light-green) 0%, #ffffff 100%);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        h1 {
+            color: var(--primary-green);
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-green), var(--light-green));
+            border-radius: 2px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .category {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(47, 90, 61, 0.08);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem;
+            position: relative;
+            border: 1px solid rgba(47, 90, 61, 0.05);
+        }
+
+        .category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-green), var(--light-green));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(47, 90, 61, 0.12);
+        }
+
+        .category:hover::before {
+            opacity: 1;
+        }
+
+        .category-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--light-green);
+            border-radius: 50%;
+            padding: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .category:hover .category-icon {
+            transform: scale(1.05);
+        }
+
+        .category-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .category-name {
+            color: var(--primary-green);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .category:hover .category-name {
+            color: var(--hover-green);
+        }
+
+        .category-description {
+            color: #666;
+            text-align: center;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .disclaimer {
+            text-align: center;
+            color: #666;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(47, 90, 61, 0.05);
+            border-radius: 12px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border: 1px solid rgba(47, 90, 61, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .categories-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 1rem;
+                margin: 1.5rem auto;
+            }
+
+            .category {
+                padding: 1.25rem 0.75rem;
+            }
+
+            .category-icon {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 0.75rem;
+                padding: 0.75rem;
+            }
+
+            .category-name {
+                font-size: 1.125rem;
+            }
+
+            .disclaimer {
+                margin-top: 1.5rem;
+                padding: 1rem;
+            }
+        }
+/* Floating Circular Sidebar */
+/* Floating Circular Sidebar */
+.sidebar {
+    width: 80px;
+    height: 80px;
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+/* User Avatar Wrapper */
+.user-avatar-container {
+    width: 65px;
+    height: 65px;
+    background: #ebeceb;  /* Dark green background */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* User Avatar Icon */
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    opacity: 0.9;
+}
+
+/* Expand Sidebar on Hover */
+.sidebar:hover {
+    width: 220px;
+    height: auto;
+    border-radius: 16px;
+    padding: 20px 15px;
+    background: #f2f3f2;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Show Menu When Hovered */
+.sidebar:hover .nav-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Hide Menu Initially */
+.nav-links {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+
+/* Sidebar Menu Styling */
+.nav-links li {
+    text-align: center;
+    background: #29543c;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.nav-links li:hover {
+    background: #3c6a4a;
+    transform: translateY(-2px);
+}
+
+
+
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="user-avatar-container">
+            <img src="user.png" class="user-avatar" alt="User Icon">
+        </div>
+        <ul class="nav-links">
+            <li onclick="window.location.href='profile.html'">
+                <i class="fas fa-user-circle"></i>Profile
+            </li>
+            <li onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>Logout
+            </li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <h1>What would you like to sell?</h1>
+        <div class="categories-grid" id="categories"></div>
+        <p class="disclaimer">We do not pick up wood, cloth, and glass.</p>
+    </div>
+
+
+    <script>
+        const categories = [
+            {
+                category_id: 1,
+                category_name: "Paper",
+                description: "Newspapers, cartons, books",
+                img: "paper.png"
+            },
+            {
+                category_id: 2,
+                category_name: "Plastic",
+                description: "Oil containers, hard/soft plastic",
+                img: "plastic.png"
+            },
+            {
+                category_id: 3,
+                category_name: "Metals",
+                description: "Utensils, coolers, drums",
+                img: "metal.png"
+            },
+            {
+                category_id: 4,
+                category_name: "E-Waste",
+                description: "Computers, keyboards, etc.",
+                img: "e-waste.png"
+            }
+        ];
+
+        $(document).ready(function() {
+            categories.forEach(category => {
+                $('#categories').append(`
+                    <div class="category" onclick="selectCategory(${category.category_id})">
+                        <div class="category-icon">
+                            <img src="${category.img}" alt="${category.category_name}" 
+                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect width=%22100%22 height=%22100%22 fill=%22%23f8f9fa%22/></svg>'">
+                        </div>
+                        <div class="category-name">${category.category_name}</div>
+                        <p class="category-description">${category.description}</p>
+                    </div>
+                `);
+            });
+        });
+
+        function selectCategory(categoryId) {
+            localStorage.setItem("selectedCategory", categoryId);
+            window.location.href = "subcategory.html";
+        }
+
+    
+    function logout() {
+            localStorage.removeItem("user_id");
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrap List</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+        table {
+            width: 60%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #4CAF50;
+            color: white;
+        }
+        button {
+            margin: 20px 10px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease-in-out;
+        }
+        #addMore {
+            background: #2196F3;
+            color: white;
+        }
+        #addMore:hover {
+            background: #1976D2;
+        }
+        #confirmAdd {
+            background: #4CAF50;
+            color: white;
+        }
+        #confirmAdd:hover {
+            background: #388E3C;
+        }
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+        }
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+        .no-items {
+            margin: 30px;
+            font-size: 18px;
+            color: #777;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Selected Scrap Subcategories</h1>
+    <table id="subcategoryTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Subcategory Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
+    <div id="noItems" class="no-items" style="display: none;">
+        No subcategories selected yet. Click "Add More" to select subcategories.
+    </div>
+    
+    <button id="addMore">Add More</button>
+    <button id="confirmAdd">Confirm Add</button>
+    
+    <script>
+        $(document).ready(function () {
+            // Get stored subcategories from localStorage
+            let storedSubcategories = JSON.parse(localStorage.getItem("selectedSubcategoryNames")) || [];
+            
+            function renderTable() {
+                let tableBody = $("#subcategoryTable tbody");
+                tableBody.empty(); // Clear existing table content
+                
+                if (storedSubcategories.length === 0) {
+                    $("#subcategoryTable").hide();
+                    $("#noItems").show();
+                } else {
+                    $("#subcategoryTable").show();
+                    $("#noItems").hide();
+                    
+                    storedSubcategories.forEach((name, index) => {
+                        tableBody.append(`
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${name}</td>
+                                <td><button class="delete-btn" data-index="${index}">Remove</button></td>
+                            </tr>
+                        `);
+                    });
+                }
+                
+                // Add event listeners to delete buttons
+                $(".delete-btn").click(function() {
+                    const index = $(this).data("index");
+                    storedSubcategories.splice(index, 1);
+                    localStorage.setItem("selectedSubcategoryNames", JSON.stringify(storedSubcategories));
+                    renderTable();
+                });
+            }
+            
+            renderTable(); // Render table on page load
+            
+            // Listen for storage changes (if multiple tabs are open)
+            window.addEventListener("storage", function (e) {
+                if (e.key === "selectedSubcategoryNames") {
+                    storedSubcategories = JSON.parse(e.newValue) || [];
+                    renderTable();
+                }
+            });
+            
+            $("#addMore").click(function () {
+                // CRITICAL: Preserve the current selections when navigating away
+                localStorage.setItem("selectedSubcategoryNames", JSON.stringify(storedSubcategories));
+                
+                // If you want to go back to the category selection page
+                window.location.href = "category.html";
+                // Or if you want to go directly to subcategory selection and have a selected category
+                // window.location.href = "subcategory.html";
+            });
+            
+            $("#confirmAdd").click(function () {
+    if (storedSubcategories.length === 0) {
+        alert("Please select at least one subcategory!");
+        return;
+    }
+
+    // Simulating fetching user details (replace with actual user session data)
+    const subcategories = JSON.parse(localStorage.getItem("selectedSubcategoryNames")) || [];
+
+fetch("http://localhost:5500/addScraplist", {
+    method: "POST",
+    headers: { 
+        "Content-Type": "application/json",
+        "user_id": localStorage.getItem("user_id") || "" // Ensure user_id is included
+    },
+    body: JSON.stringify({ subcategories })
+})
+.then(response => response.json())
+.then(data => {
+    alert(data.message);
+    localStorage.removeItem("selectedSubcategoryNames");
+    window.location.href = "shopmapmain.html";
+})
+.catch(error => console.error("Fetch Error:", error));
+
+
+        });
+    });
+    </script>
+</body>
+</html>

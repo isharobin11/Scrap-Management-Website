@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nearby Scrap Shops</title>
+
+  <!-- Leaflet.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <style>
+   body { 
+    font-family: 'Poppins', sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    background-color: #f8fcf8; 
+    color: #333;
+  }
+
+  h1 { 
+    text-align: center; 
+    padding: 20px 0; 
+    font-size: 28px; 
+    color: #3b9c3f; 
+    font-weight: 700;
+  }
+
+  .container { 
+    max-width: 900px; 
+    margin: auto; 
+    padding: 20px; 
+    background: white; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .location-input { 
+    text-align: center; 
+    margin-bottom: 25px; 
+  }
+
+  .location-input input { 
+    padding: 12px; 
+    width: 70%; 
+    max-width: 400px; 
+    border: 2px solid #3b9c3f; 
+    border-radius: 8px; 
+    font-size: 16px;
+    background: white;
+    color: #333;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .location-input input:focus {
+    border-color: #2e7d32;
+    outline: none;
+    box-shadow: 0 0 10px rgba(59, 156, 63, 0.3);
+  }
+
+  .location-input button { 
+    padding: 12px 18px; 
+    background: #3b9c3f; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    font-size: 16px; 
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .location-input button:hover { 
+    background: #2e7d32; 
+    transform: scale(1.05);
+  }
+
+  #map { 
+    height: 450px; 
+    width: 100%; 
+    border-radius: 10px; 
+    margin-bottom: 25px; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .shops-list { 
+    list-style: none; 
+    padding: 0; 
+  }
+
+  .shop-card { 
+    background: white; 
+    margin: 12px 0; 
+    padding: 18px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+    border-left: 5px solid #3b9c3f;
+    transition: all 0.3s;
+  }
+
+  .shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .shop-name { 
+    font-weight: 700; 
+    font-size: 1.2em; 
+    color: #3b9c3f; 
+    margin-bottom: 5px;
+  }
+
+  .shop-details { 
+    font-size: 0.95em; 
+    color: #666; 
+    margin-bottom: 5px;
+  }
+
+  .shop-distance { 
+    font-size: 0.9em; 
+    color: #2e7d32; 
+    font-weight: bold; 
+    margin-bottom: 10px;
+  }
+
+  .select-btn { 
+    padding: 10px 14px; 
+    background: #3b9c3f; 
+    color: white; 
+    border: none; 
+    border-radius: 6px; 
+    font-size: 14px; 
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .select-btn:hover { 
+    background: #2e7d32; 
+    transform: scale(1.05);
+  }
+
+  </style>
+</head>
+<body>
+
+  <h1>Find Nearby Scrap Shops</h1>
+  <div class="container">
+    <div class="location-input">
+      <input type="text" id="locationInput" placeholder="Enter your location (e.g., kanjirapally, kottayam)">
+      <button onclick="searchLocation()">Search</button>
+    </div>
+    <div id="map"></div>
+    <ul class="shops-list" id="shops-list"></ul>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+  <script>
+    let map, userMarker;
+    let selectedShop = null;
+
+    function initMap(lat, lon) {
+      if (!map) {
+        map = L.map('map').setView([lat, lon], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+      } else {
+        map.setView([lat, lon], 13);
+      }
+
+      if (userMarker) {
+        userMarker.setLatLng([lat, lon]);
+      } else {
+        userMarker = L.marker([lat, lon]).addTo(map).bindPopup('Your Location').openPopup();
+      }
+
+      fetchNearbyShops(lat, lon);
+    }
+    function getUserLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => initMap(position.coords.latitude, position.coords.longitude),
+          error => alert("Unable to retrieve location. Enter manually."),
+          { enableHighAccuracy: true }
+        );
+      } else {
+        alert("Geolocation not supported by this browser.");
+      }
+    }
+
+    function fetchNearbyShops(lat, lon) {
+      fetch(`http://localhost:5500/get_nearby_shops?lat=${lat}&lon=${lon}`)
+        .then(response => response.json())
+        .then(data => {
+          const shopList = document.getElementById("shops-list");
+          shopList.innerHTML = "";
+
+          if (data.length === 0) {
+            shopList.innerHTML = "<p>No nearby scrap shops found.</p>";
+            return;
+          }
+
+          data.forEach(shop => {
+            const { shop_id, shop_name, shop_address, latitude, longitude, distance } = shop;
+
+            const listItem = document.createElement("li");
+            listItem.className = "shop-card";
+            listItem.innerHTML = `
+              <div class="shop-name">${shop_name}</div>
+             <div class="shop-details">${shop_address}</div>
+              <div class="shop-distance">Distance: ${distance.toFixed(2)} km</div>
+              <button class="select-btn" onclick="selectShop('${shop_id}', '${shop_name}', '${shop_address}', ${latitude}, ${longitude})">
+                Select Shop
+              </button>
+            `;
+            shopList.appendChild(listItem);
+
+            L.marker([latitude, longitude]).addTo(map)
+              .bindPopup(`<strong>${shop_name}</strong><br>${shop_address}<br>Distance: ${distance.toFixed(2)} km`);
+          });
+        })
+        .catch(error => console.error("Error fetching scrap shops:", error));
+    }
+
+    function searchLocation() {
+      const location = document.getElementById("locationInput").value;
+      if (!location) {
+        alert("Please enter a location.");
+        return;
+      }
+
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.length > 0) {
+            initMap(parseFloat(data[0].lat), parseFloat(data[0].lon));
+          } else {
+            alert("Location not found. Try again.");
+          }
+        })
+        .catch(error => console.error("Error fetching location:", error));
+    }
+
+    
+
+    function selectShop(shop_id, shop_name, shop_address, shop_lat, shop_lon) {
+  const user_id = localStorage.getItem("user_id"); // Ensure user is logged in
+  const location_name = document.getElementById("locationInput").value; // Get location name from input
+
+  if (!user_id) {
+    alert("You must be logged in to select a shop.");
+    window.location.href = "login.html"; // Redirect to login page
+    return;
+  }
+  if (!location_name) {
+    alert("Please enter a location before selecting a shop.");
+    return;
+  }
+// Get user's current location
+   if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const user_lat = position.coords.latitude;
+        const user_lon = position.coords.longitude;
+
+        const selectedShop = { shop_id, shop_name, shop_address, shop_lat, shop_lon, user_lat, user_lon,location_name };
+        localStorage.setItem("selectedShop", JSON.stringify(selectedShop));
+
+        // Send data to backend
+        fetch("http://localhost:5500/save-selected-shop", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id, shop_id, user_lat, user_lon,location_name })
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data.message);
+          if (confirm(`You selected: ${shop_name}\nProceed to schedule pickup?`)) {
+            window.location.href = "pickup.html";
+          }
+        })
+        .catch(error => console.error("Error saving selected shop and user location:", error));
+      },
+      (error) => {
+        alert("Failed to get your location. Please allow location access and try again.");
+      }
+    );
+  } else {
+    alert("Geolocation is not supported by your browser.");
+  }
+}
+
+
+
+  </script>
+</body>
+</html>

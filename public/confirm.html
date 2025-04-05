@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Confirmation</title>
+    <style>
+        :root {
+            --primary-color: #2e8b57; /* Sea Green */
+            --primary-light: #e8f5e9; /* Very Light Green */
+            --primary-dark: #1a5e3a; /* Dark Green */
+            --accent-color: #4caf50; /* Medium Green */
+            --text-color: #333333;
+            --text-light: #666666;
+            --border-color: #e0e0e0;
+            --danger-color: #d32f2f;
+            --danger-dark: #b71c1c;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 650px;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin: 20px auto;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 28px;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 10px;
+        }
+        
+        .details {
+            text-align: left;
+            margin: 20px 0;
+            padding: 18px;
+            border-radius: 8px;
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .details h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .details p {
+            margin: 10px 0;
+            color: var(--text-color);
+            font-size: 15px;
+        }
+        
+        .details p strong {
+            color: var(--primary-dark);
+            font-weight: 600;
+            display: inline-block;
+            width: 120px;
+        }
+        
+        #map {
+            height: 300px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        #manual-address {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        #manual-address:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.2);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            flex: 1;
+            max-width: 250px;
+        }
+        
+        .confirm-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .confirm-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cancel-btn {
+            background: white;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+        
+        .cancel-btn:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .details {
+                padding: 15px;
+            }
+            
+            .details p strong {
+                width: 100px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+
+    <div class="container">
+        <h2>Final Confirmation</h2>
+
+        <div class="details">
+            <h3>User Details</h3>
+            <p><strong>Username:</strong> <span id="username"></span></p>
+            <p><strong>Email:</strong> <span id="email"></span></p>
+            <p><strong>Phone:</strong> <span id="phone"></span></p>
+        </div>
+
+        <div class="details">
+            <h3>Scrap Details</h3>
+            <p><strong>Subcategory:</strong> <span id="subcategory_name"></span></p>
+        </div>
+
+        <div class="details">
+            <h3>Shop Details</h3>
+            <p><strong>Shop Name:</strong> <span id="shop_name"></span></p>
+            <p><strong>Shop Address:</strong> <span id="shop_address"></span></p>
+        </div>
+        
+        <div class="details">
+            <h3>Pickup Schedule</h3>
+            <p><strong>Pickup Date:</strong> <span id="pickup_date"></span></p>
+            <p><strong>Pickup Time:</strong> <span id="pickup_time"></span></p>
+        </div>
+        
+        <div class="details">
+            <h3>Pickup Location</h3>
+            <p><strong>Address:</strong> <span id="location_address"></span></p>
+            <input type="text" id="manual-address" placeholder="Enter address manually" oninput="updateAddress()">
+
+            <div id="map"></div>
+        </div>
+
+        <div class="button-group">
+            <button class="confirm-btn" onclick="confirmSubmission()">Confirm & Submit</button>
+            <button class="cancel-btn" onclick="cancelPickup()">Cancel Pickup</button>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+
+    <script>
+        let map; 
+
+        function getLoggedInUserId() {
+            let userId = localStorage.getItem("user_id");
+            if (!userId) {
+                alert("User not logged in! Redirecting to login page.");
+                window.location.href = "login.html";
+                return null;
+            }
+            return userId;
+        }
+
+        function fetchConfirmationDetails() {
+            let userId = getLoggedInUserId();
+            if (!userId) return;
+            fetch(`http://localhost:5500/get-pickup-details?user_id=${userId}`)
+    .then(response => response.json())
+    // Change this part in fetchConfirmationDetails function
+.then(data => {
+    if (!data.success) {
+        alert("No data found.");
+        return;
+    }
+
+    // Handle the new response format where subcategories is a string
+    let pickup = data.pickup; // Changed from data.pickups[0]
+    document.getElementById("username").textContent = pickup.username;
+    document.getElementById("email").textContent = pickup.email;
+    document.getElementById("phone").textContent = pickup.phone;
+    document.getElementById("subcategory_name").textContent = pickup.subcategories; // This field now handles multiple items
+    document.getElementById("shop_name").textContent = pickup.shop_name;
+    document.getElementById("shop_address").textContent = pickup.shop_address;
+    document.getElementById("location_address").textContent = pickup.location_name ? pickup.location_name : "Address not available";
+
+    document.getElementById("pickup_date").textContent = pickup.pickup_date || "Not scheduled";
+    document.getElementById("pickup_time").textContent = pickup.pickup_time || "Not scheduled";
+    
+    loadMap();
+    if (pickup.latitude && pickup.longitude) {
+        loadMap(pickup.latitude, pickup.longitude);
+    }
+})
+                .catch(error => console.error("Error fetching data:", error));
+        }
+        
+
+
+      
+        function loadMap(lat = 10.8505, lng = 76.2711) { // Default: Kerala, India
+    if (!map) {
+        map = L.map("map").setView([lat, lng], 7); // Zoom level 7 for Kerala
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+    } else {
+        map.setView([lat, lng], 10); // Adjust zoom when updating location
+    }
+
+    L.marker([lat, lng]).addTo(map).bindPopup("Pickup Location").openPopup();
+}
+
+       
+        function updateAddress() {
+    let manualAddress = document.getElementById("manual-address").value.trim();
+    if (manualAddress) {
+        document.getElementById("location_address").innerText = manualAddress;
+    }
+}
+  
+
+
+function cancelPickup() {
+    const user_id = localStorage.getItem("user_id");
+
+    if (!user_id) {
+        alert("Invalid request. Missing user ID.");
+        return;
+    }
+
+    fetch("http://localhost:5500/cancel-pickup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message); // Show success or error message
+        if (data.success) {
+            window.location.href = "home.html"; // Redirect after success
+        }
+    })
+    .catch(error => {
+        console.error("Error cancelling pickup:", error);
+        alert("An error occurred. Please try again.");
+    });
+}
+function confirmSubmission() {
+    let userId = getLoggedInUserId();
+    if (!userId) return;
+
+    fetch("http://localhost:5500/confirm-pickup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Pickup confirmed! Your request has been submitted.");
+            setTimeout(() => {
+                window.location.href = "success.html"; // Ensure smooth transition
+            }, 500); // Small delay for user experience
+        } else {
+            console.warn("Pickup confirmation failed:", data.message);
+            alert("Failed to confirm pickup. Please try again.");
+        }
+    })
+    .catch(error => {
+        console.error("Error confirming pickup:", error);
+        alert("An error occurred. Please check your connection and try again.");
+    });
+}
+
+        window.onload = fetchConfirmationDetails;
+        
+        
+    </script>
+</body>
+</html>

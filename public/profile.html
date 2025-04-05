@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrapix User Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #009e0b;
+            --primary-light: #e0f2e0;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --white: #FFFFFF;
+            --border-color: #E5E7EB;
+            --status-pending: #FCD34D;
+            --status-completed: #34D399;
+            --status-cancelled: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f6f8f6;
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 600;
+        }
+
+        .welcome-text {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .profile-header {
+            background-color: var(--white);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .profile-info h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            background-color: var(--white);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .section {
+            background-color: var(--white);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .pickup-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .pickup-card {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .pickup-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .pickup-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pickup-date {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .pickup-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .status-pending {
+            background-color: var(--status-pending);
+            color: #92400E;
+        }
+
+        .status-completed {
+            background-color: var(--status-completed);
+            color: #065F46;
+        }
+
+        .status-cancelled {
+            background-color: var(--status-cancelled);
+            color: #991B1B;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+            }
+
+            .pickup-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div>
+            <div class="app-logo">
+                <i class="fas fa-recycle logo-icon"></i>
+                <span class="logo-text">Scrapix</span>
+            </div>
+        </div>
+        <div>
+            <button onclick="logout()" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Go Back</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="profile-info">
+            <p id="userEmail">Loading...</p>
+        </div>
+    </div>
+
+    <div class="nav-links">
+        <a href="#" class="nav-link active">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+        </a>
+    </div>
+
+    <section class="section">
+        <h2 class="section-title">Your Recycling Selections</h2>
+        <div class="chart-container">
+            <canvas id="selectionsChart"></canvas>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Upcoming Pickups</h2>
+        <div id="pickupList" class="pickup-cards">
+            <!-- Pickup cards will be populated here -->
+        </div>
+    </section>
+
+    <script>
+        $(document).ready(function() {
+            const userId = localStorage.getItem("user_id");
+
+            if (!userId) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            // Fetch user details
+            $.ajax({
+                url: "http://localhost:5500/getUser",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ user_id: userId }),
+                success: function(response) {
+                    if (response.success) {
+                        $("#userName").text(response.data.name);
+                        $("#userEmail").text(response.data.email);
+                    } else {
+                        console.error("User fetch failed:", response.message);
+                    }
+                },
+                error: function(err) {
+                    console.error("Error fetching user details:", err);
+                }
+            });
+
+            // Fetch user history
+            $.ajax({
+                url: "http://localhost:5500/getUserHistory",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ user_id: userId }),
+                success: function(response) {
+                    if (response.success && response.history.length > 0) {
+                        createSelectionsChart(response.history);
+                    } else {
+                        $(".chart-container").html('<div class="no-data"><i class="fas fa-info-circle"></i><p>No selections made yet</p></div>');
+                    }
+                },
+                error: function(err) {
+                    console.error("Error fetching history:", err);
+                    $(".chart-container").html('<div class="no-data"><i class="fas fa-exclamation-triangle"></i><p>Error loading data</p></div>');
+                }
+            });
+
+            // Fetch pickup schedules
+$.ajax({
+    url: "http://localhost:5500/getUserPickups",
+    type: "POST",
+    contentType: "application/json",
+    data: JSON.stringify({ user_id: userId }),
+    success: function(response) {
+        const pickupList = $("#pickupList");
+        pickupList.empty();
+
+        if (response.success && response.pickups.length > 0) {
+            response.pickups.forEach(item => {
+                const statusClass = `status-${item.status.toLowerCase()}`;
+                pickupList.append(`
+                    <div class="pickup-card">
+                        <div class="pickup-card-header">
+                            <div class="pickup-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div>
+                                <div class="pickup-date">${item.pickup_date}</div>
+                                <span class="pickup-status ${statusClass}">${item.status}</span>
+                            </div>
+                        </div>
+                        <div class="pickup-subcategory">
+                            <strong>Subcategory:</strong> ${item.subcategory || 'N/A'}
+                        </div>
+                    </div>
+                `);
+            });
+        } else {
+            pickupList.html('<div class="no-data"><i class="fas fa-calendar"></i><p>No pickups scheduled</p></div>');
+        }
+    },
+    error: function(err) {
+        console.error("Error fetching pickup schedules:", err);
+        pickupList.html('<div class="no-data"><i class="fas fa-exclamation-triangle"></i><p>Error loading pickups</p></div>');
+    }
+});
+
+        });
+
+        function createSelectionsChart(historyData) {
+            const ctx = document.getElementById('selectionsChart').getContext('2d');
+            
+            // Prepare data for chart
+            const labels = historyData.map(item => `${item.category_name} > ${item.subcategory_name}`);
+            const data = historyData.map(item => item.selection_count);
+            
+            // Green color theme shades
+            const greenShades = generateGreenShades(historyData.length);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Selections',
+                        data: data,
+                        backgroundColor: greenShades,
+                        borderColor: greenShades.map(color => color.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Selections: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateGreenShades(count) {
+            // Create different shades of green based on the primary color #009e0b
+            const greenShades = [
+                'rgba(0, 158, 11, 0.9)',    // Main color
+                'rgba(0, 138, 10, 0.85)',   // Slightly darker
+                'rgba(0, 178, 12, 0.8)',    // Slightly lighter
+                'rgba(0, 118, 8, 0.75)',    // Darker
+                'rgba(0, 198, 14, 0.7)'     // Lighter
+            ];
+            
+            let colors = [];
+            for (let i = 0; i < count; i++) {
+                colors.push(greenShades[i % greenShades.length]);
+            }
+            return colors;
+        }
+
+        function logout() {
+            localStorage.removeItem("user_id");
+            window.location.href = "category.html";
+        }
+    </script>
+</body>
+</html>

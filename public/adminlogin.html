@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrapix Admin Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('scrapix-bg.jpg') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-bottom: 24px;
+            color: #4CAF50;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            background-color: #f9f9f9;
+        }
+        input:focus {
+            border-color: #4CAF50;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, transform 0.2s;
+            margin-top: 20px;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <img src="scrapix logo new.png" alt="Scrapix Logo" class="logo">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+        <input type="email" id="email" name="email" placeholder="Email" required>
+        <p id="emailError" class="error"></p>
+
+        <input type="password" id="password" name="password" placeholder="Password" required>
+        <p id="passwordError" class="error"></p>
+
+        <input type="submit" value="Login">
+    </form>
+    <p id="errorMessage" class="error"></p>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        
+        const emailError = document.getElementById("emailError");
+        const passwordError = document.getElementById("passwordError");
+        const errorMessage = document.getElementById("errorMessage");
+
+        emailError.textContent = "";
+        emailError.style.display = "none";
+        passwordError.textContent = "";
+        passwordError.style.display = "none";
+        errorMessage.textContent = "";
+        errorMessage.style.display = "none";
+
+        let hasError = false;
+
+        if (!email.includes("@") || email.length < 5) {
+            emailError.textContent = "Enter a valid email address.";
+            emailError.style.display = "block";
+            hasError = true;
+        }
+        if (password.length < 6) {
+            passwordError.textContent = "Password must be at least 6 characters.";
+            passwordError.style.display = "block";
+            hasError = true;
+        }
+        if (hasError) return;
+
+        try {
+            const response = await fetch("http://localhost:5001/api/admin/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                sessionStorage.setItem("admin", JSON.stringify(data.admin));
+                alert("Login successful!");
+                window.location.href = "admin.html";
+            } else {
+                errorMessage.textContent = data.message || "Invalid email or password.";
+                errorMessage.style.display = "block";
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            errorMessage.textContent = "Server error. Please try again.";
+            errorMessage.style.display = "block";
+        }
+    });
+</script>
+
+</body>
+</html>

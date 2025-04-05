@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Pickup</title>
+    <style>
+        :root {
+            --primary-color: #2e8b57; /* Sea Green */
+            --primary-dark: #1a5e3a;
+            --accent-color: #4caf50; /* Lighter Green */
+            --text-color: #333333;
+            --light-gray: #f5f7fa;
+            --border-color: #e1e4e8;
+            --success-color: #28a745;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 550px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            border: 1px solid #eaeaea;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 28px;
+        }
+        
+        .shop-info {
+            padding: 15px;
+            background: rgba(46, 139, 87, 0.05);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+        
+        .shop-info p {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--primary-dark);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.1s;
+        }
+        
+        button:hover {
+            background: var(--primary-dark);
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:disabled {
+            background: #a0ceb7;
+            cursor: not-allowed;
+        }
+        
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+                border-radius: 8px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Schedule Your Pickup</h1>
+
+        <!-- Shop Information Display -->
+        <div class="shop-info" id="shop-info">
+            <p><strong>Shop Name:</strong> <span id="shop-name"></span></p>
+            <p><strong>Shop Address:</strong> <span id="shop-address"></span></p>
+        </div>
+
+        <label for="pickup-date">Select Pickup Date:</label>
+        <input type="date" id="pickup-date" required>
+
+        <label for="pickup-time">Select Pickup Time:</label>
+        <select id="pickup-time" required>
+            <option value="09:00:00">09:00 AM</option>
+            <option value="10:00:00">10:00 AM</option>
+            <option value="11:00:00">11:00 AM</option>
+            <option value="12:00:00">12:00 PM</option>
+            <option value="14:00:00">02:00 PM</option>
+            <option value="15:00:00">03:00 PM</option>
+            <option value="16:00:00">04:00 PM</option>
+        </select>
+
+        <button id="confirm-button" onclick="confirmPickup()">Confirm Pickup</button>
+        <div id="loading">Processing your request...</div>
+    </div>
+
+    <script>
+      // Load shop details function
+function loadShopDetails() {
+    const selectedShop = JSON.parse(localStorage.getItem("selectedShop"));
+    
+    console.log("Loading shop details:", selectedShop);
+    
+    if (!selectedShop) {
+        console.error("No shop data found in localStorage");
+        alert("No shop selected! Redirecting back to shop selection...");
+        window.location.href = "shopmap.html";
+        return false;
+    }
+
+    // Make sure we have all required shop data
+    if (!selectedShop.shop_name || !selectedShop.shop_address) {
+        console.error("Incomplete shop data:", selectedShop);
+        alert("Incomplete shop information. Please select a shop again.");
+        window.location.href = "shopmap.html";
+        return false;
+    }
+
+    document.getElementById("shop-name").innerText = selectedShop.shop_name;
+    document.getElementById("shop-address").innerText = selectedShop.shop_address;
+    
+    return true;
+}
+
+// Modified confirmPickup function
+function confirmPickup() {
+    // First verify shop data is loaded properly
+    const selectedShop = JSON.parse(localStorage.getItem("selectedShop"));
+    
+    if (!selectedShop || !selectedShop.shop_id) {
+        console.error("Missing or invalid shop data:", selectedShop);
+        alert("Shop information is missing or invalid. Please select a shop again.");
+        window.location.href = "shopmap.html";
+        return;
+    }
+    
+    const user_id = localStorage.getItem("user_id");
+    const pickupDate = document.getElementById("pickup-date").value;
+    const pickupTime = document.getElementById("pickup-time").value;
+
+    console.log("Confirming pickup with data:", {
+        shop: selectedShop,
+        user_id: user_id,
+        date: pickupDate,
+        time: pickupTime
+    });
+
+    if (!user_id) {
+        alert("User not logged in! Please log in first.");
+        window.location.href = "log.html";
+        return;
+    }
+
+    if (!pickupDate || !pickupTime) {
+        alert("Please select a valid date and time for pickup.");
+        return;
+    }
+
+    // Disable button to prevent multiple submissions
+    const confirmButton = document.getElementById("confirm-button");
+    if (confirmButton) {
+        confirmButton.disabled = true;
+    }
+
+    // Send pickup details to the backend
+    fetch("http://localhost:5500/schedule-pickup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            user_id: user_id,
+            shop_id: selectedShop.shop_id,
+            pickup_date: pickupDate,
+            pickup_time: pickupTime
+        })
+    })
+    .then(response => {
+        console.log("Response status:", response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log("API Response:", data);
+        
+        // Store pickup ID if available
+        if (data.pickup_id) {
+            localStorage.setItem("pickup_id", data.pickup_id);
+        }
+        
+        alert("Pickup scheduled successfully!");
+        
+        // Simple redirect first
+        window.location.href = "confirm.html";
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Error scheduling pickup. Please try again.");
+        if (confirmButton) {
+            confirmButton.disabled = false;
+        }
+    });
+}
+
+// Initialize the page
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("Page loaded, initializing...");
+    const shopLoaded = loadShopDetails();
+    
+    if (shopLoaded) {
+        console.log("Shop details loaded successfully");
+    } else {
+        console.error("Failed to load shop details");
+    }
+    
+    // Make sure the confirmButton exists
+    const confirmButton = document.getElementById("confirm-button");
+    if (!confirmButton) {
+        console.error("Could not find confirm-button element");
+    }
+});
+    </script>
+</body>
+</html>

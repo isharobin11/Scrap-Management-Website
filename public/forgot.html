@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password | ScrapiX</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f0f4ff 0%, #c0c8c3 100%);
+    }
+
+    .container {
+        padding: 20px;
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        padding: 40px;
+    }
+
+    h2 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group {
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #e1e1e1;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #00c8ad;
+        box-shadow: 0 0 0 3px rgba(88, 80, 236, 0.1);
+    }
+
+    .error-message {
+        color: red;
+        font-size: 0.9rem;
+        display: none;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .btn {
+        width: 100%;
+        background: #008a3b;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        background: #00c8ad;
+        transform: translateY(-2px);
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+<body>
+    <div class="container">
+        <!-- Step 1: Forgot Password -->
+        <div id="forgotPasswordStep">
+            <h2>Reset Password</h2>
+            <p>Enter your email to receive an OTP</p>
+            <form id="forgotPasswordForm">
+                <div class="input-group">
+                    <input type="email" id="forgot-email" placeholder="Enter your email" required>
+                </div>
+                <p id="forgot-error-message" class="error-message"></p>
+                <button type="submit" class="btn">Send OTP</button>
+            </form>
+        </div>
+
+        <!-- Step 2: Enter OTP -->
+        <div id="otpStep" class="hidden">
+            <h2>Enter OTP</h2>
+            <p>Check your email for the OTP</p>
+            <form id="otpForm">
+                <div class="input-group">
+                    <input type="text" id="otp-code" placeholder="Enter OTP" required>
+                </div>
+                <p id="otp-error-message" class="error-message"></p>
+                <button type="submit" class="btn">Verify OTP</button>
+            </form>
+        </div>
+
+        <!-- Step 3: Reset Password -->
+        <div id="resetPasswordStep" class="hidden">
+            <h2>Reset Password</h2>
+            <p>Enter a new password</p>
+            <form id="resetPasswordForm">
+                <div class="input-group">
+                    <input type="password" id="new-password" placeholder="New Password" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                </div>
+                <p id="reset-error-message" class="error-message"></p>
+                <button type="submit" class="btn">Reset Password</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("forgotPasswordForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const email = document.getElementById("forgot-email").value.trim();
+            const errorMessage = document.getElementById("forgot-error-message");
+
+            try {
+                const response = await fetch("http://localhost:5500/forgot-password", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem("reset_email", email); // Store email for next step
+                    document.getElementById("forgotPasswordStep").classList.add("hidden");
+                    document.getElementById("otpStep").classList.remove("hidden");
+                } else {
+                    errorMessage.textContent = data.message || "Error sending OTP.";
+                    errorMessage.style.display = "block";
+                }
+            } catch (error) {
+                errorMessage.textContent = "Something went wrong!";
+                errorMessage.style.display = "block";
+            }
+        });
+
+        document.getElementById("otpForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const otp = document.getElementById("otp-code").value.trim();
+            const email = localStorage.getItem("reset_email");
+            const errorMessage = document.getElementById("otp-error-message");
+
+            try {
+                const response = await fetch("http://localhost:5500/verify-otp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, otp })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById("otpStep").classList.add("hidden");
+                    document.getElementById("resetPasswordStep").classList.remove("hidden");
+                } else {
+                    errorMessage.textContent = data.message || "Invalid OTP.";
+                    errorMessage.style.display = "block";
+                }
+            } catch (error) {
+                errorMessage.textContent = "Something went wrong!";
+                errorMessage.style.display = "block";
+            }
+        });
+
+        document.getElementById("resetPasswordForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const email = localStorage.getItem("reset_email");
+            const newPassword = document.getElementById("new-password").value.trim();
+            const confirmPassword = document.getElementById("confirm-password").value.trim();
+            const errorMessage = document.getElementById("reset-error-message");
+
+            if (newPassword !== confirmPassword) {
+                errorMessage.textContent = "Passwords do not match!";
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:5500/reset-password", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, newPassword })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("Password reset successful. Please log in.");
+                    window.location.href = "login.html";
+                } else {
+                    errorMessage.textContent = data.message || "Error resetting password.";
+                    errorMessage.style.display = "block";
+                }
+            } catch (error) {
+                errorMessage.textContent = "Something went wrong!";
+                errorMessage.style.display = "block";
+            }
+        });
+    </script>
+</body>
+</html>
