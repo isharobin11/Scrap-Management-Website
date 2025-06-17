@@ -11,8 +11,8 @@ const otpGenerator = require("otp-generator");
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "scrapixmini17@gmail.com",
-      pass: "dahz fchi daqq duwa",
+      user: ,
+      pass: ,
     },
   });
   
@@ -34,8 +34,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const pool = mysql.createPool({
     host: "localhost",
     user: "root",      
-    password: "WJ28@krhps",
-    database: "isha"
+    password: ,
+    database: 
 });
 
 // Signup Route
