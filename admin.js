@@ -19,16 +19,16 @@ app.use(express.json());
 const adminDB = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "WJ28@krhps",
-    database: "scrapix_admin",
+    password: ,
+    database: ,
 });
 
 // ✅ Connect to miniproject (For fetching users)
 const userDB = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "WJ28@krhps",
-    database: "isha",
+    password: ,
+    database: ,
 });
 
 // ✅ Connect both databases
